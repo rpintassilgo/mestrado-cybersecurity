@@ -4,12 +4,22 @@ const passport = require('passport')
 const session = require('express-session')
 const local = require('./config/passport')
 const dotenv = require('dotenv').config()
+const prometheus = require('prom-client');
 
 const app = express();
 const port = process.env.BACKEND_PORT;
 const authRoute = require('./routes/auth.routes');
 const weatherRoute = require('./routes/weather.routes');
 
+app.get('/metrics', async (req, res) => {
+  try {
+    const metrics = await prometheus.register.metrics();
+    res.set('Content-Type', prometheus.register.contentType);
+    res.end(metrics);
+  } catch (error) {
+    res.status(500).end(error.message);
+  }
+});
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
