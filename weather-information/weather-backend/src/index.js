@@ -27,7 +27,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: { maxAge: 30 * 60 * 1000,
             sameSite: 'Lax',
-            secure: false
+            secure: true
          }
 }))
 app.use(passport.initialize())
