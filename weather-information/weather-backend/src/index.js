@@ -11,16 +11,6 @@ const port = process.env.BACKEND_PORT;
 const authRoute = require('./routes/auth.routes');
 const weatherRoute = require('./routes/weather.routes');
 
-app.get('/metrics', async (req, res) => {
-  try {
-    const metrics = await prometheus.register.metrics();
-    res.set('Content-Type', prometheus.register.contentType);
-    res.end(metrics);
-  } catch (error) {
-    res.status(500).end(error.message);
-  }
-});
-
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: true,
@@ -48,6 +38,21 @@ app.use(function(req, res, next) {
 app.use('/auth', authRoute)
 app.use('/weather', weatherRoute)
 
+
+// Create a Registry to register the metrics
+const register = new prometheus.Registry();
+prometheus.collectDefaultMetrics({ register });
+
+// Define a route to expose the metrics to Prometheus
+app.get('/metrics', async (req, res) => {
+  try {
+    const metrics = await prometheus.register.metrics();
+    res.set('Content-Type', prometheus.register.contentType);
+    res.end(metrics);
+  } catch (error) {
+    res.status(500).end(error.message);
+  }
+});
 
 app.listen(port, () => {
     console.log(`Application is listening at port ${port}`);

@@ -10,7 +10,7 @@ const esTransportOpts = {
   level: 'info',
   clientOpts: {
     // elasticsearch docker's ip
-    node: "http://172.19.0.3:9200"
+    node: "http://172.18.0.3:9200"
   },
   indexPrefix: 'app-logs-*',
   index: `app-logs-${new Date().toISOString().split('T')[0]}`
