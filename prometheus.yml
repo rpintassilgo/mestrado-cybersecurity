@@ -1,0 +1,32 @@
+---
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: prometheus
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - localhost:9090
+  - job_name: cadvisor
+    static_configs:
+      - targets:
+          - cadvisor:8080
+  - job_name: redis
+    static_configs:
+      - targets:
+          - redis-exporter:9121
+  - job_name: nodejs-backend
+    static_configs:
+      - targets:
+          - 192.168.1.207:3001
+  - job_name: speedtest
+    scrape_interval: 5m
+    scrape_timeout: 1m
+    static_configs:
+      - targets: 
+          - speedtest-exporter:9798
+  - job_name: mongodb
+    static_configs:
+      - targets: 
+          - 192.168.1.207:9216
+    

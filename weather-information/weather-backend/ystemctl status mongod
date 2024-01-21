@@ -1,0 +1,12 @@
+[0;1;32m●[0m mongod.service - MongoDB Database Server
+     Loaded: loaded (/lib/systemd/system/mongod.service; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (running)[0m since Sat 2024-01-20 17:43:20 WET; 5h 33min ago
+       Docs: https://docs.mongodb.org/manual
+   Main PID: 651 (mongod)
+     Memory: 26.9M
+        CPU: 1min 423ms
+     CGroup: /system.slice/mongod.service
+             └─651 /usr/bin/mongod --config /etc/mongod.conf
+
+jan 20 17:43:20 rodrigo-virtualbox systemd[1]: Started MongoDB Database Server.
+jan 20 17:43:21 rodrigo-virtualbox mongod[651]: {"t":{"$date":"2024-01-20T17:43:21.695Z"},"s":"I",  "c":"CONTROL",  "id":7484500, "ctx":"main","msg":"Environment variable MONGODB_CONFIG_OVERRIDE_NOFORK == 1, overriding \"processManagement.fork\" to false"}

@@ -1,0 +1,2 @@
+# HELP failed_login_attempts_total Total number of failed login attempts
+# TYPE failed_login_attempts_total counter
