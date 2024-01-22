@@ -5,12 +5,13 @@ const LocalStrategy = require('passport-local').Strategy
 const prometheus = require('prom-client');
 const winston = require('winston');
 const { ElasticsearchTransport } = require('winston-elasticsearch');
+const redisClient = require('./redis');
 
 const esTransportOpts = {
   level: 'info',
   clientOpts: {
     // elasticsearch docker's ip
-    node: "http://172.18.0.3:9200"
+    node: "http://172.18.0.2:9200"
   },
   indexPrefix: 'app-logs-*',
   index: `app-logs-${new Date().toISOString().split('T')[0]}`
@@ -37,9 +38,13 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (email, done) => {
     try {
         const user = await User.findOne({ email: email }) 
-        if(user) done(null,user) 
+        if(user){
+        	done(null,user) 
+        	return
+        }
     } catch (error) {
         done(error,false)
+        return;
     }
 })
 
@@ -48,26 +53,46 @@ passport.use(new LocalStrategy({
     passwordField: 'password'
 }, async (username, password, done) => {
     try {
-        const user = await User.findOne({ email: username }).select('+password')
+        const lockKey = `${username}-lock`;
+        const lockValue = await redisClient.get(lockKey);
+        if (lockValue && new Date().getTime() < parseInt(lockValue)) {
+            // Include a message in the done function
+            done(null, false, { message: 'Account is temporarily locked' });
+            return;
+        }
         
-        if(!user) {
-            done(null,false)
-            return
+        const user = await User.findOne({ email: username }).select('+password');
+        
+        if (!user) {
+            // Include a message in the done function
+            done(null, false, { message: 'Incorrect username' });
+            return;
         }
     
-        if(bcrypt.compareSync(password, user.password)){
+        if (bcrypt.compareSync(password, user.password)) {
             // Passwords match
-            done(null,user)
-        } else{
+            await redisClient.set(`${username}-login`, 0);
+            done(null, user);
+        } else {
             // Passwords do not match
             const timestamp = new Date().toISOString();
             const message = `Failed login attempt for user: ${username}`;
             logger.error({ message, '@timestamp': timestamp });
             failedLoginCounter.inc({ email: username });
-            done(null,false)
+            
+            const failedKey = `${username}-login`;
+            const failedAttempts = parseInt(await redisClient.get(failedKey) || '0') + 1;
+            await redisClient.set(failedKey, failedAttempts);
+            
+            if (failedAttempts >= 3) {
+                // Lock account for 30 seconds
+                await redisClient.set(lockKey, new Date().getTime() + 30000);
+            }
+
+            // Include a message in the done function
+            done(null, false, { message: 'Incorrect password' });
         }          
     } catch (error) {
-        done(error, false)
+        done(error);
     }
-  }
-))
+}));

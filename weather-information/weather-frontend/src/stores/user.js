@@ -5,7 +5,7 @@ export const useUserStore = defineStore('user', () => {
     const axios = inject('axios')
 
     const user = ref(null)
-     
+
     async function login(credentials) {
         try {
             const response = await axios.post('auth/authenticate', credentials)
@@ -16,11 +16,15 @@ export const useUserStore = defineStore('user', () => {
             }
             sessionStorage.setItem('user',JSON.stringify(user.value))
             
-            return true       
+            return { success: true };         
         } 
         catch(error) {
             clearUser()
-            return false
+            if (error.response && error.response.data && error.response.data.info) {
+                 return { success: false, message: error.response.data.info.message };
+             } else {
+                 return { success: false, message: 'Authentication failed' };
+             }
         }
     }
 

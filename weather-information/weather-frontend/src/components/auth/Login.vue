@@ -24,14 +24,15 @@
 }
 
   const login = async () => {
-    if (await userStore.login(credentials.value)) {
+  	const result = await userStore.login(credentials.value)
+    if (result.success) {
       toast.success('User ' + userStore.user.name + ' has entered the application.')
       emit('login')
       router.push({ name: 'Homepage' })
       addCookieTimer()
     } else {
       credentials.value.password = ''
-      toast.error('User credentials are invalid!')
+      toast.error(result.message)
     }
   }
 </script>
