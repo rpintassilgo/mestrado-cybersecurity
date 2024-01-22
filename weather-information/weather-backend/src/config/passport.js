@@ -50,7 +50,10 @@ passport.use(new LocalStrategy({
     try {
         const user = await User.findOne({ email: username }).select('+password')
         
-        if(!user) done(null,false)
+        if(!user) {
+            done(null,false)
+            return
+        }
     
         if(bcrypt.compareSync(password, user.password)){
             // Passwords match
