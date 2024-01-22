@@ -4,7 +4,6 @@ const passport = require('passport')
 const session = require('express-session')
 const local = require('./config/passport')
 const dotenv = require('dotenv').config()
-console.log(process.env)
 const prometheus = require('prom-client');
 
 const app = express();
