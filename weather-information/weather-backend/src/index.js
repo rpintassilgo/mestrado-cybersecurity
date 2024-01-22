@@ -11,13 +11,18 @@ const port = process.env.BACKEND_PORT;
 const authRoute = require('./routes/auth.routes');
 const weatherRoute = require('./routes/weather.routes');
 
+// Global unhandled promise rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true,
     cookie: { maxAge: 30 * 60 * 1000,
             sameSite: 'Lax',
-            secure: true
+            secure: false
          }
 }))
 app.use(passport.initialize())
